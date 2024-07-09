@@ -1,0 +1,32 @@
+#!/bin/bash
+
+if [[ $# -ne 3 ]]; then
+  echo "Usage: new-htb.sh start|maschine|challenge|sherlock <machine-name> <ip-address>"
+  exit 1
+fi
+
+TYPE=$1
+NAME=$2
+IPADDR=$3
+WORKDIR="$HOME/projects/htb/labs/$TYPE/$NAME"
+
+if [[ -d $WORKDIR ]];then
+  echo "$WORKDIR already exists. bye"
+  exit 1
+fi
+
+echo "Looks like a new target..."
+mkdir -p $WORKDIR
+
+echo "Setup README.md..."
+cat << EOF > $WORKDIR/README.md 
+# $NAME
+$(date)
+
+EOF
+
+echo "Run rustscan"
+rustscan --addresses $IPADDR --accessible -t 3000 -b 500 -- -sV | tee $WORKDIR/portscan.out
+
+echo "finished... opening codium"
+codium $WORKDIR
